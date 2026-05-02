@@ -20,7 +20,7 @@ jobs:
       with:
         node-version: 24
         cache: yarn
-    - uses: google-github-actions/setup-gcloud@v2
+    - uses: google-github-actions/setup-gcloud@v3
     - name: Install PubSub emulator
       run: gcloud components install beta pubsub-emulator --quiet
     - name: npm install, lint, build, and test
