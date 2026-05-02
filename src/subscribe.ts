@@ -1,5 +1,9 @@
 import pmap from 'p-map';
-import { v1, type Message, type SubscriptionOptions } from '@google-cloud/pubsub';
+import {
+  v1,
+  type Message,
+  type SubscriptionOptions as BaseSubscriptionOptions,
+} from '@google-cloud/pubsub';
 import { PreciseDate } from '@google-cloud/precise-date';
 import type {
   AnyServiceLocals,
@@ -30,10 +34,10 @@ type HandlerReturnType<Ack extends AckType> = Ack extends 'ACK'
   ? typeof ACK | Promise<typeof ACK>
   : void | Promise<void>;
 
-export type SesameSubscriptionOptions<HandlerAck extends AckType = 'auto'> = {
+export type SubscriptionOptions<HandlerAck extends AckType = 'auto'> = {
   ack?: HandlerAck;
   noLog?: boolean;
-} & SubscriptionOptions;
+} & BaseSubscriptionOptions;
 
 export interface PubSubHandlerContext {
   // Additional fields to be added to the log message, if any
@@ -113,7 +117,7 @@ export async function subscribe<
   HandlerAck extends AckType = 'auto',
 >(
   app: ServiceExpress<SLocals>,
-  options: HandlerAck | SesameSubscriptionOptions<HandlerAck>,
+  options: HandlerAck | SubscriptionOptions<HandlerAck>,
   ...handlerSpecs: (TopicHandler<HandlerAck, SLocals> | SubscriptionHandler<HandlerAck, SLocals>)[]
 ) {
   const activeCounter = app.locals.meter.createUpDownCounter('pubsub_active_handlers', {
@@ -184,15 +188,15 @@ export async function subscribe<
         interval =
           spec.heartbeatInterval !== -1
             ? setInterval(() => {
-              app.locals.logger.info(
-                {
-                  messageId: message.id,
-                  sub: subscription.name,
-                  durationMs: Date.now() - start,
-                },
-                'Long-running message',
-              );
-            }, spec.heartbeatInterval || DEFALUT_HEARTBEAT_INTERVAL)
+                app.locals.logger.info(
+                  {
+                    messageId: message.id,
+                    sub: subscription.name,
+                    durationMs: Date.now() - start,
+                  },
+                  'Long-running message',
+                );
+              }, spec.heartbeatInterval || DEFALUT_HEARTBEAT_INTERVAL)
             : undefined;
         activeCounter.add(1, labels);
         requestCounter.add(1, labels);
@@ -342,7 +346,7 @@ export async function subscribeWithPositiveACK<SLocals extends AnyServiceLocals>
 
 export async function subscribeWithAutoAckWithOptions<SLocals extends AnyServiceLocals>(
   app: ServiceExpress<SLocals>,
-  options: SubscriptionOptions,
+  options: BaseSubscriptionOptions,
   ...handlerSpecs: (TopicHandler<'auto', SLocals> | SubscriptionHandler<'auto', SLocals>)[]
 ) {
   return subscribe(app, { ack: 'auto', ...options }, ...handlerSpecs);
@@ -350,7 +354,7 @@ export async function subscribeWithAutoAckWithOptions<SLocals extends AnyService
 
 export async function subscribeWithPositiveACKWithOptions<SLocals extends AnyServiceLocals>(
   app: ServiceExpress<SLocals>,
-  options: SubscriptionOptions,
+  options: BaseSubscriptionOptions,
   ...handlerSpecs: (TopicHandler<'ACK', SLocals> | SubscriptionHandler<'ACK', SLocals>)[]
 ) {
   return subscribe(app, { ack: 'ACK', ...options }, ...handlerSpecs);
@@ -364,7 +368,7 @@ export async function peekMessages<SLocals extends AnyServiceLocals>(
   const name =
     'subscription' in options
       ? options.subscription
-      : getSubscriptionName(app.locals.name, { topic: options.topic, handler: () => { } });
+      : getSubscriptionName(app.locals.name, { topic: options.topic, handler: () => {} });
   const client = new v1.SubscriberClient();
   const projectId = pubsub.projectId;
   const subPath = client.subscriptionPath(projectId, name);
