@@ -1,0 +1,105 @@
+{
+  "name": "@openapi-typescript-infra/google-pubsub",
+  "version": "0.0.0",
+  "description": "Typescript infrastructure for Google PubSub in Typescript services",
+  "type": "module",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "default": "./build/index.js"
+    }
+  },
+  "author": "Developers <developers@pyralis.com>",
+  "license": "MIT",
+  "packageManager": "yarn@3.8.7",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "yarn dlx rimraf ./dist",
+    "lint": "eslint .",
+    "test": "PUBSUB_EMULATOR_HOST=localhost:8538 GOOGLE_CLOUD_PROJECT=fake-project vitest",
+    "postinstall": "cpconfig"
+  },
+  "files": [
+    "build",
+    "README.md"
+  ],
+  "keywords": [
+    "typescript",
+    "pubsub",
+    "gcp",
+    "google-cloud"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openapi-typescript-infra/google-pubsub.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      [
+        "@semantic-release/exec",
+        {
+          "publishCmd": "yarn dlx pinst --disable"
+        }
+      ],
+      "@semantic-release/npm",
+      "@semantic-release/github"
+    ]
+  },
+  "config": {
+    "cpconfig": "@openapi-typescript-infra/cpconfig"
+  },
+  "prettier": {
+    "bracketSpacing": true,
+    "bracketSameLine": true,
+    "singleQuote": true,
+    "trailingComma": "all",
+    "printWidth": 100,
+    "overrides": [
+      {
+        "files": "*.js",
+        "options": {
+          "parser": "babel"
+        }
+      }
+    ]
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@openapi-typescript-infra/cpconfig": "^1.1.0",
+    "@openapi-typescript-infra/service": "^6.13.1",
+    "@semantic-release/exec": "^7.1.0",
+    "@semantic-release/github": "^12.0.6",
+    "@types/node": "^25.6.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.0",
+    "@typescript-eslint/parser": "^8.59.0",
+    "cpconfig": "^1.5.0",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
+    "globals": "^17.5.0",
+    "google-pubsub-emulator": "^7.1.0",
+    "jiti": "^2.6.1",
+    "prettier": "^3.8.3",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.59.0",
+    "vitest": "^4.1.5"
+  },
+  "dependencies": {
+    "@google-cloud/pubsub": "^5.3.0"
+  },
+  "peerDependencies": {
+    "@openapi-typescript-infra/service": ">=6.13.1"
+  }
+}

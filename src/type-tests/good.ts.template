@@ -1,0 +1,74 @@
+import { fakeApp } from '../test-consts.js';
+import { ACK, subscribe } from '../../src/subscribe.js';
+
+// Auto returns nothing
+subscribe(fakeApp, 'auto', {
+  topic: 'test-topic',
+  handler() {
+    console.log('ok');
+  },
+}).catch((e) => {
+  console.log(e);
+});
+
+// ack returns ACK
+subscribe(fakeApp, 'ACK', {
+  topic: 'test-topic',
+  handler() {
+    return ACK;
+  },
+}).catch((e) => {
+  console.log(e);
+});
+
+// manual returns nothing
+subscribe(fakeApp, 'manual', {
+  topic: 'test-topic',
+  handler() {
+    console.log('ok');
+  },
+}).catch((e) => {
+  console.log(e);
+});
+
+// Auto returns nothing
+subscribe(
+  fakeApp,
+  { ack: 'auto' },
+  {
+    topic: 'test-topic',
+    handler() {
+      console.log('ok');
+    },
+  },
+).catch((e) => {
+  console.log(e);
+});
+
+// ack returns ACK
+subscribe(
+  fakeApp,
+  { ack: 'ACK' },
+  {
+    topic: 'test-topic',
+    handler() {
+      return ACK;
+    },
+  },
+).catch((e) => {
+  console.log(e);
+});
+
+// manual returns nothing
+subscribe(
+  fakeApp,
+  { ack: 'manual' },
+  {
+    topic: 'test-topic',
+    handler() {
+      console.log('ok');
+    },
+  },
+).catch((e) => {
+  console.log(e);
+});

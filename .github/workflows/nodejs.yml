@@ -1,0 +1,56 @@
+name: Node build, test and publish
+
+on:
+  pull_request:
+    types: [assigned, opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - name: Use Node.js 24
+      uses: actions/setup-node@v6
+      with:
+        node-version: 24
+        cache: yarn
+    - uses: google-github-actions/setup-gcloud@v2
+    - name: Install PubSub emulator
+      run: gcloud components install beta pubsub-emulator --quiet
+    - name: npm install, lint, build, and test
+      run: |
+        yarn install --immutable
+        yarn lint
+        yarn build
+        yarn test
+      env:
+        CI: true
+
+  publish-npm:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      issues: write
+      id-token: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: yarn
+      - run: yarn install --immutable
+      - run: yarn build
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"
+        run: npx semantic-release
